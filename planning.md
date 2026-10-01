@@ -7,7 +7,12 @@ It's a 2d collecting game where we have a sprite to control and whenever we coll
 3. The Main game loop has movement logic, Collison logic, and Score logic.
 4. In the finale it updates displays onto the screen.
 ## Planning required changes
-
+1. Change speed of char
+2. Change the backdrop color
+3. Change starting pos
+4. Add a start button (w restart components)
+5. looping movement
+6. A -> speed boost ( 3 times/ game )
 ## Brainstorming game ideas
 
 ## Plan for implementing game
