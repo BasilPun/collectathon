@@ -8,6 +8,7 @@
 #include <bn_sprite_text_generator.h>
 #include <bn_size.h>
 #include <bn_string.h>
+#include <bn_backdrop.h>
 
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"
@@ -44,6 +45,9 @@ int main()
     bn::sprite_text_generator text_generator(common::fixed_8x16_sprite_font);
 
     int score = 0;
+
+    // setting backdrop
+    bn::backdrop::set_color(bn::color(0, 6, 20));
 
     bn::sprite_ptr player = bn::sprite_items::square.create_sprite(-50, 50);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
