@@ -17,12 +17,11 @@
 // Pixels / Frame player moves at
 static constexpr bn::fixed SPEED = 2.5;
 
-//spawn locations for sprite & treasure
+// spawn locations for sprite & treasure
 static constexpr int PLAYER_STARTING_X = 0;
 static constexpr int PLAYER_STARTING_Y = 0;
 static constexpr int TREASURE_STARTING_X = -40;
 static constexpr int TREASURE_STARTING_Y = -40;
-
 
 // Width and height of the the player and treasure bounding boxes
 static constexpr bn::size PLAYER_SIZE = {8, 8};
@@ -59,7 +58,7 @@ int main()
     bn::sprite_ptr player = bn::sprite_items::square.create_sprite(-50, 50);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
 
-    //spawn location
+    // spawn location
     player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
     treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
 
@@ -102,6 +101,24 @@ int main()
             treasure.set_position(new_x, new_y);
 
             score++;
+        }
+
+        // looping char around the screen
+        if (player.x() > MAX_X)
+        {
+            player.set_position(MIN_X, player.y());
+        }
+        if (player.x() < MIN_X)
+        {
+            player.set_position(MAX_X, player.y());
+        }
+        if (player.y() > MAX_Y)
+        {
+            player.set_position(player.x(), MIN_Y);
+        }
+        if (player.y() < MIN_Y)
+        {
+            player.set_position(player.x(), MAX_Y);
         }
 
         // Update score display
