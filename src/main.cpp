@@ -53,7 +53,7 @@ int main()
         // Move player with d-pad
         if (bn::keypad::left_held())
         {
-            player.set_x(player.x() - SPEED);
+            player.set_x(player.x() - SPEED - 1);
         }
         if (bn::keypad::right_held())
         {
