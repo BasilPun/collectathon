@@ -9,13 +9,14 @@
 #include <bn_size.h>
 #include <bn_string.h>
 #include <bn_backdrop.h>
+#include <bn_color.h>
 
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"
 #include "common_fixed_8x16_font.h"
 
 // Pixels / Frame player moves at
-static constexpr bn::fixed SPEED = 2.5;
+//bn::fixed SPEED = 1.5;
 
 // spawn locations for sprite & treasure
 static constexpr int PLAYER_STARTING_X = 0;
@@ -45,6 +46,8 @@ int main()
     bn::core::init();
 
     bn::random rng = bn::random();
+    int counter = 0;
+    float SPEED = 1.5;
 
     // Will hold the sprites for the score
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites = {};
@@ -81,6 +84,21 @@ int main()
         {
             player.set_y(player.y() + SPEED);
         }
+        if (bn::keypad::a_pressed())
+        {
+            //if A pressed, increase speed & change bg color to red
+            SPEED = 2.5;
+            bn::backdrop::set_color(bn::color(15, 0, 0));
+        }
+        
+        counter++;
+        //since 60fps, 180 frames = 3 second boost
+        if (counter >= 180){
+            bn::backdrop::set_color(bn::color(0, 6, 20));
+            SPEED = 1.5;
+            counter = 0;
+        }
+        
 
         // The bounding boxes of the player and treasure, snapped to integer pixels
         bn::rect player_rect = bn::rect(player.x().round_integer(),
