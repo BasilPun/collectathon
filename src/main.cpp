@@ -86,6 +86,19 @@ int main()
             player.set_y(player.y() + SPEED);
         }
 
+        // reset game on start press
+        if (bn::keypad::start_pressed())
+        {
+            player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
+            treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
+            score = 0;
+            boosts = 3;
+            SPEED = 1.5;
+
+            boostMode = false;
+            counter = 0;
+        }
+
         if (boosts != 0 && boostMode == false)
         {
             if (bn::keypad::a_pressed())
