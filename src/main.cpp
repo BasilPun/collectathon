@@ -57,7 +57,7 @@ int main()
     int score = 0;
 
     // setting backdrop
-    bn::backdrop::set_color(bn::color(0, 6, 20));
+    bn::backdrop::set_color(bn::color(0, 6, 20));//Color Blue
 
     bn::sprite_ptr player = bn::sprite_items::square.create_sprite(-50, 50);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
@@ -104,9 +104,9 @@ int main()
         {
             if (bn::keypad::a_pressed())
             {
-                // if A pressed, increase speed & change bg color to red
+                // if A pressed, increase speed & change bg color 
                 SPEED = 2.5;
-                bn::backdrop::set_color(bn::color(15, 0, 0));
+                bn::backdrop::set_color(bn::color(15, 0, 0));//Color Red
                 boosts--;
                 boostMode = true;
             }
@@ -120,7 +120,7 @@ int main()
             if (counter >= 180)
             {
 
-                bn::backdrop::set_color(bn::color(0, 6, 20));
+                bn::backdrop::set_color(bn::color(0, 6, 20));//Comes back to blue after boost
                 SPEED = 1.5;
                 counter = 0;
                 boostMode = false;
