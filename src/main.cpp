@@ -47,7 +47,7 @@ int main()
 
     bn::random rng = bn::random();
     int counter = 0;
-    float SPEED = 1.5;
+    float SPEED = 1;
     int boosts = 3;
     bool boostMode = false;
     // Will hold the sprites for the score
