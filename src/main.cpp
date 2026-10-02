@@ -16,7 +16,7 @@
 #include "common_fixed_8x16_font.h"
 
 // Pixels / Frame player moves at
-//bn::fixed SPEED = 1.5;
+// bn::fixed SPEED = 1.5;
 
 // spawn locations for sprite & treasure
 static constexpr int PLAYER_STARTING_X = 0;
@@ -48,7 +48,8 @@ int main()
     bn::random rng = bn::random();
     int counter = 0;
     float SPEED = 1.5;
-
+    int boosts = 3;
+    bool boostMode = false;
     // Will hold the sprites for the score
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites = {};
     bn::sprite_text_generator text_generator(common::fixed_8x16_sprite_font);
@@ -84,21 +85,32 @@ int main()
         {
             player.set_y(player.y() + SPEED);
         }
-        if (bn::keypad::a_pressed())
+
+        if (boosts != 0 && boostMode == false)
         {
-            //if A pressed, increase speed & change bg color to red
-            SPEED = 2.5;
-            bn::backdrop::set_color(bn::color(15, 0, 0));
+            if (bn::keypad::a_pressed())
+            {
+                // if A pressed, increase speed & change bg color to red
+                SPEED = 2.5;
+                bn::backdrop::set_color(bn::color(15, 0, 0));
+                boosts--;
+                boostMode = true;
+            }
         }
-        
-        counter++;
-        //since 60fps, 180 frames = 3 second boost
-        if (counter >= 180){
-            bn::backdrop::set_color(bn::color(0, 6, 20));
-            SPEED = 1.5;
-            counter = 0;
+
+        // so that counter doesn't constantly count and waste compute
+        if (boostMode)
+        {
+            counter++;
+            // since 60fps, 180 frames = 3 second boost
+            if (counter >= 180)
+            {
+                bn::backdrop::set_color(bn::color(0, 6, 20));
+                SPEED = 1.5;
+                counter = 0;
+                boostMode = false;
+            }
         }
-        
 
         // The bounding boxes of the player and treasure, snapped to integer pixels
         bn::rect player_rect = bn::rect(player.x().round_integer(),
