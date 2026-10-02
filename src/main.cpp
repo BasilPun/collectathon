@@ -62,7 +62,8 @@ int main()
     bn::sprite_ptr player = bn::sprite_items::square.create_sprite(-50, 50);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
 
-    // spawn location
+    // spawn location, we will be spawning our char in the middle
+    // of the screen & spawning starting trasure at top left of char
     player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
     treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
 
@@ -118,6 +119,7 @@ int main()
             // since 60fps, 180 frames = 3 second boost
             if (counter >= 180)
             {
+
                 bn::backdrop::set_color(bn::color(0, 6, 20));
                 SPEED = 1.5;
                 counter = 0;
