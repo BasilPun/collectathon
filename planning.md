@@ -21,6 +21,7 @@ It's a 2d collecting game where we have a sprite to control and whenever we coll
 5. make points move around, when more points, make them faster
 6. add a time limit for game time (prehaps 60s?)
 7. bombs instead of treasure to deduct points
+8. add a start screen and restart screen for when game ends/starts.
 
 ## Plan for implementing game
 
