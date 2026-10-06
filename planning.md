@@ -15,9 +15,8 @@ It's a 2d collecting game where we have a sprite to control and whenever we coll
 6. A -> speed boost ( 3 times/ game )
 ## Brainstorming game ideas
 1. Stamina bar instead of press for speed boosts. Stamina bar will reload speed and determine if user can be boosted or not. Will be visualised by stamina bar or colour of sprite.
-2. 
-3. 
-4.
-
+2. Camera Position changes with the sprite
+3. boost audio and audio for treassure is collected
+4. custom sprites for tresure and character.
 ## Plan for implementing game
 
