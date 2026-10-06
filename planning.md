@@ -18,5 +18,9 @@ It's a 2d collecting game where we have a sprite to control and whenever we coll
 2. Camera Position changes with the sprite
 3. boost audio and audio for treassure is collected
 4. custom sprites for tresure and character.
+5. make points move around, when more points, make them faster
+6. add a time limit for game time (prehaps 60s?)
+7. bombs instead of treasure to deduct points
+
 ## Plan for implementing game
 
