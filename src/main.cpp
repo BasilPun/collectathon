@@ -57,7 +57,7 @@ int main()
     int score = 0;
 
     // setting backdrop
-    bn::backdrop::set_color(bn::color(0, 6, 20));
+    bn::backdrop::set_color(bn::color(0, 6, 20));//Color Blue
 
     bn::sprite_ptr player = bn::sprite_items::square.create_sprite(-50, 50);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
@@ -87,11 +87,14 @@ int main()
             player.set_y(player.y() + SPEED);
         }
 
-        // reset game on start press
+        // Reset game state and player stats when the START button is pressed
         if (bn::keypad::start_pressed())
         {
+            // Reset positions of player and treasure to starting defaults
             player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
             treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
+            
+            // Reset score, speed, and boost mechanics
             score = 0;
             boosts = 3;
             SPEED = 1.5;
@@ -104,9 +107,9 @@ int main()
         {
             if (bn::keypad::a_pressed())
             {
-                // if A pressed, increase speed & change bg color to red
+                // if A pressed, increase speed & change bg color 
                 SPEED = 2.5;
-                bn::backdrop::set_color(bn::color(15, 0, 0));
+                bn::backdrop::set_color(bn::color(15, 0, 0));//Color Red
                 boosts--;
                 boostMode = true;
             }
@@ -120,7 +123,7 @@ int main()
             if (counter >= 180)
             {
 
-                bn::backdrop::set_color(bn::color(0, 6, 20));
+                bn::backdrop::set_color(bn::color(0, 6, 20));//Comes back to blue after boost
                 SPEED = 1.5;
                 counter = 0;
                 boostMode = false;
@@ -148,22 +151,22 @@ int main()
             score++;
         }
 
-        // looping char around the screen
+        // looping char around screen boundaries
         if (player.x() > MAX_X)
         {
-            player.set_position(MIN_X, player.y());
+            player.set_position(MIN_X, player.y()); // loop from right edge to left edge
         }
         if (player.x() < MIN_X)
         {
-            player.set_position(MAX_X, player.y());
+            player.set_position(MAX_X, player.y());// loop from left edge to right edge
         }
         if (player.y() > MAX_Y)
         {
-            player.set_position(player.x(), MIN_Y);
+            player.set_position(player.x(), MIN_Y);// loop from bottom edge to top edge
         }
         if (player.y() < MIN_Y)
         {
-            player.set_position(player.x(), MAX_Y);
+            player.set_position(player.x(), MAX_Y);// loop from top edge to bottom edge
         }
 
         // Update score display
