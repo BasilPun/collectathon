@@ -46,10 +46,18 @@ int main()
     bn::core::init();
 
     bn::random rng = bn::random();
-    int counter = 0;
+    // int counter = 0;
     float SPEED = 1;
-    int boosts = 3;
+    // int boosts = 3;
     bool boostMode = false;
+
+    // stamina bar feature
+    // boost will last 240 frames (4 seconds) & take 8 seconds to recover
+    const float MAX_STAMINA = 240;
+    float stamina = MAX_STAMINA;
+    float recovery_rate = 0.5;
+    bool no_stamina = false;
+
     // Will hold the sprites for the score
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites = {};
     bn::sprite_text_generator text_generator(common::fixed_8x16_sprite_font);
@@ -57,7 +65,7 @@ int main()
     int score = 0;
 
     // setting backdrop
-    bn::backdrop::set_color(bn::color(0, 6, 20));//Color Blue
+    bn::backdrop::set_color(bn::color(0, 6, 20)); // Color Blue
 
     bn::sprite_ptr player = bn::sprite_items::square.create_sprite(-50, 50);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
@@ -93,42 +101,71 @@ int main()
             // Reset positions of player and treasure to starting defaults
             player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
             treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
-            
+
             // Reset score, speed, and boost mechanics
             score = 0;
-            boosts = 3;
-            SPEED = 1.5;
+            SPEED = 1;
 
+            // boosts = 0;
+            // boostMode = false;
+            // counter = 0;
+        }
+
+        if (bn::keypad::a_held() && !no_stamina)
+        {
+            SPEED = 2.5;
+            stamina = stamina - 1;
+            boostMode = true;
+        }
+        if (bn::keypad::a_released() || stamina <= 0)
+        {
+            // revert speed back
+            SPEED = 1;
             boostMode = false;
-            counter = 0;
-        }
-
-        if (boosts != 0 && boostMode == false)
-        {
-            if (bn::keypad::a_pressed())
+            if (stamina <= 0)
             {
-                // if A pressed, increase speed & change bg color 
-                SPEED = 2.5;
-                bn::backdrop::set_color(bn::color(15, 0, 0));//Color Red
-                boosts--;
-                boostMode = true;
+                no_stamina = true;
             }
         }
 
-        // so that counter doesn't constantly count and waste compute
-        if (boostMode)
+        if (!boostMode)
         {
-            counter++;
-            // since 60fps, 180 frames = 3 second boost
-            if (counter >= 180)
+            if (stamina < MAX_STAMINA)
             {
-
-                bn::backdrop::set_color(bn::color(0, 6, 20));//Comes back to blue after boost
-                SPEED = 1.5;
-                counter = 0;
-                boostMode = false;
+                stamina = stamina + recovery_rate;
             }
+            else
+            {
+                stamina = MAX_STAMINA;
+            }
+            no_stamina = false;
         }
+        // if (boosts != 0 && boostMode == false)
+        // {
+        //     if (bn::keypad::a_pressed())
+        //     {
+        //         // if A pressed, increase speed & change bg color
+        //         SPEED = 2.5;
+        //         bn::backdrop::set_color(bn::color(15, 0, 0));//Color Red
+        //         boosts--;
+        //         boostMode = true;
+        //     }
+        // }
+
+        // // so that counter doesn't constantly count and waste compute
+        // if (boostMode)
+        // {
+        //     counter++;
+        //     // since 60fps, 180 frames = 3 second boost
+        //     if (counter >= 180)
+        //     {
+
+        //         bn::backdrop::set_color(bn::color(0, 6, 20));//Comes back to blue after boost
+        //         SPEED = 1.5;
+        //         counter = 0;
+        //         boostMode = false;
+        //     }
+        // }
 
         // The bounding boxes of the player and treasure, snapped to integer pixels
         bn::rect player_rect = bn::rect(player.x().round_integer(),
@@ -158,15 +195,15 @@ int main()
         }
         if (player.x() < MIN_X)
         {
-            player.set_position(MAX_X, player.y());// loop from left edge to right edge
+            player.set_position(MAX_X, player.y()); // loop from left edge to right edge
         }
         if (player.y() > MAX_Y)
         {
-            player.set_position(player.x(), MIN_Y);// loop from bottom edge to top edge
+            player.set_position(player.x(), MIN_Y); // loop from bottom edge to top edge
         }
         if (player.y() < MIN_Y)
         {
-            player.set_position(player.x(), MAX_Y);// loop from top edge to bottom edge
+            player.set_position(player.x(), MAX_Y); // loop from top edge to bottom edge
         }
 
         // Update score display
