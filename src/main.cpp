@@ -222,10 +222,12 @@ int main()
 
         // update stamina display
 
-        int intStamina = stamina;
-        bn::string<MAX_SCORE_CHARS> stamina_string = bn::to_string<MAX_SCORE_CHARS>(intStamina);
+        int int_stamina_percentage = stamina / MAX_STAMINA * 100;
+        bn::string<MAX_SCORE_CHARS> stamina_string = bn::to_string<MAX_SCORE_CHARS>(int_stamina_percentage);
         stamina_sprites.clear();
-        bn::string stamina_text = "Stamina:" + stamina_string;
+
+        // call stamina boost cause stamina has too many chars
+        bn::string stamina_text = "BOOST:" + stamina_string + "%";
 
         text_generator.generate(STAMINA_X, STAMINA_Y,
                                 stamina_text,
