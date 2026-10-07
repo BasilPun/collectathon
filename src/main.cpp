@@ -10,6 +10,7 @@
 #include <bn_string.h>
 #include <bn_backdrop.h>
 #include <bn_color.h>
+#include <cmath>
 
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"
@@ -41,6 +42,10 @@ static constexpr int MAX_SCORE_CHARS = 11;
 static constexpr int SCORE_X = 70;
 static constexpr int SCORE_Y = -70;
 
+// stamina location, simillar location to score
+static constexpr int STAMINA_X = -100;
+static constexpr int STAMINA_Y = -70;
+
 int main()
 {
     bn::core::init();
@@ -60,6 +65,7 @@ int main()
 
     // Will hold the sprites for the score
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites = {};
+    bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> stamina_sprites = {};
     bn::sprite_text_generator text_generator(common::fixed_8x16_sprite_font);
 
     int score = 0;
@@ -125,6 +131,7 @@ int main()
             if (stamina <= 0)
             {
                 no_stamina = true;
+                stamina = 0;
             }
         }
 
@@ -212,6 +219,17 @@ int main()
         text_generator.generate(SCORE_X, SCORE_Y,
                                 score_string,
                                 score_sprites);
+
+        // update stamina display
+
+        int intStamina = stamina;
+        bn::string<MAX_SCORE_CHARS> stamina_string = bn::to_string<MAX_SCORE_CHARS>(intStamina);
+        stamina_sprites.clear();
+        bn::string stamina_text = "Stamina:" + stamina_string;
+
+        text_generator.generate(STAMINA_X, STAMINA_Y,
+                                stamina_text,
+                                stamina_sprites);
 
         // Update RNG seed every frame so we don't get the same sequence of positions every time
         rng.update();
