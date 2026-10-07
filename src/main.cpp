@@ -194,7 +194,6 @@ int main()
 
             score++;
         }
-
         // looping char around screen boundaries
         if (player.x() > MAX_X)
         {

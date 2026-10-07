@@ -14,15 +14,24 @@ It's a 2d collecting game where we have a sprite to control and whenever we coll
 5. looping movement
 6. A -> speed boost ( 3 times/ game )
 ## Brainstorming game ideas
-1. Stamina instead of press for speed boosts. Stamina will reload speed and determine if user can be boosted or not.
-2. Show stamina with number on top left side.
+~~1. Stamina instead of press for speed boosts. Stamina will reload speed and determine if user can be boosted or not.~~
+
+~~2. Show stamina with number on top left side.~~
+
 3. boost audio and audio for treassure is collected
+
 4. custom sprites for tresure and character.
+
 5. make points move around, when more points, make them faster
+
 6. add a time limit for game time (prehaps 60s?)
+
 7. bombs instead of treasure to deduct points
+
 8. add a start screen and restart screen for when game ends/starts.
+
 9. Camera Position changes with the sprite
+
 
 ## Plan for implementing game
 
