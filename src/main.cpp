@@ -15,6 +15,8 @@
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_square.h"
 #include "common_fixed_8x16_font.h"
+#include "bn_music_items.h"
+
 
 // Pixels / Frame player moves at
 // bn::fixed SPEED = 1.5;
@@ -80,6 +82,9 @@ int main()
     // of the screen & spawning starting trasure at top left of char
     player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
     treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
+
+    //background music 
+    bn::music_items::somewher.play();
 
     while (true)
     {
