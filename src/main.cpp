@@ -94,8 +94,10 @@ int main()
 
     while (true)
     {
+        //Timer control if GAME OVER, FREEZE GAMEPLAY
         if(game_over)
-    {
+    {   
+        //if start is pressed the timer variables reset to restart the game
         if(bn::keypad::start_pressed()){
             score=0;
             SPEED =1;
@@ -105,6 +107,7 @@ int main()
             player.set_position(PLAYER_STARTING_X,PLAYER_STARTING_Y);
             treasure.set_position(TREASURE_STARTING_X,TREASURE_STARTING_Y);
         }
+
         //Display message showing their final score
         timer_sprites.clear();
         text_generator.generate(0,0,"TIME'S UP!!", timer_sprites);
@@ -140,6 +143,11 @@ int main()
             // Reset score, speed, and boost mechanics
             score = 0;
             SPEED = 1;
+
+            //Timer Reset
+            time_left_seconds =60;
+            frame_counter = 0;
+            game_over  = false;
 
             // boosts = 0;
             // boostMode = false;
@@ -260,23 +268,26 @@ int main()
         text_generator.generate(STAMINA_X, STAMINA_Y,
                                 stamina_text,
                                 stamina_sprites);
+
         // Clock ticking down
         frame_counter++;
         if(frame_counter>=60)
         {
             time_left_seconds--;
             frame_counter =0;
+
             if(time_left_seconds<=0)
             {
                 time_left_seconds =0;
                 game_over = true; // This will trigger a freez block
             }
         }
-        bn::string<MAX_SCORE_CHARS>timer_string="TIME:"+bn::to_string<MAX_SCORE_CHARS>(time_left_seconds);
-        timer_sprites.clear();
-        text_generator.generate(0,-70, timer_string, timer_sprites);
+
+            bn::string<MAX_SCORE_CHARS>timer_string = "TIME:" + bn::to_string<MAX_SCORE_CHARS>(time_left_seconds);
+            timer_sprites.clear();
+            text_generator.generate(0, -70, timer_string, timer_sprites);
         // Update RNG seed every frame so we don't get the same sequence of positions every time
-        rng.update();
+            rng.update();
 
         bn::core::update();
     }
