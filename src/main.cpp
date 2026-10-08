@@ -72,6 +72,12 @@ int main()
 
     int score = 0;
 
+    //Setting a 60s game timer
+    int time_left_seconds = 60; //starts at 60s
+    int frame_counter = 0;  //Tracks 60 fps
+    bool game_over = false; //stops the game when time runs out
+
+    bn::vector<bn::sprite_ptr,MAX_SCORE_CHARS> timer_sprites ={};
     // setting backdrop
     bn::backdrop::set_color(bn::color(0, 6, 20)); // Color Blue
 
@@ -88,6 +94,24 @@ int main()
 
     while (true)
     {
+        if(game_over)
+    {
+        if(bn::keypad::start_pressed()){
+            score=0;
+            SPEED =1;
+            time_left_seconds = 60;
+            frame_counter =0;
+            game_over = false;
+            player.set_position(PLAYER_STARTING_X,PLAYER_STARTING_Y);
+            treasure.set_position(TREASURE_STARTING_X,TREASURE_STARTING_Y);
+        }
+        //Display message showing their final score
+        timer_sprites.clear();
+        text_generator.generate(0,0,"TIME'S UP!!", timer_sprites);
+        rng.update();
+        bn::core::update();
+        continue;// Skips the rest of the file so they cant score
+    }
         // Move player with d-pad
         if (bn::keypad::left_held())
         {
@@ -236,7 +260,21 @@ int main()
         text_generator.generate(STAMINA_X, STAMINA_Y,
                                 stamina_text,
                                 stamina_sprites);
-
+        // Clock ticking down
+        frame_counter++;
+        if(frame_counter>=60)
+        {
+            time_left_seconds--;
+            frame_counter =0;
+            if(time_left_seconds<=0)
+            {
+                time_left_seconds =0;
+                game_over = true; // This will trigger a freez block
+            }
+        }
+        bn::string<MAX_SCORE_CHARS>timer_string="TIME:"+bn::to_string<MAX_SCORE_CHARS>(time_left_seconds);
+        timer_sprites.clear();
+        text_generator.generate(0,-70, timer_string, timer_sprites);
         // Update RNG seed every frame so we don't get the same sequence of positions every time
         rng.update();
 
