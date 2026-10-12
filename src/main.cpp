@@ -125,10 +125,12 @@ int main()
         if (bn::keypad::left_held())
         {
             player.set_x(player.x() - SPEED);
+            player.set_horizontal_flip(false);
         }
         if (bn::keypad::right_held())
         {
             player.set_x(player.x() + SPEED);
+            player.set_horizontal_flip(true);
         }
         if (bn::keypad::up_held())
         {
