@@ -22,6 +22,9 @@
 #include "bn_sprite_items_closewingbird.h"
 #include "bn_sprite_items_openwingbird.h"
 
+// graphics for pill
+#include "bn_sprite_items_pill.h"
+
 // bg sprite
 #include "bn_regular_bg_ptr.h"
 #include "bn_regular_bg_items_cave.h"
@@ -34,6 +37,8 @@ static constexpr int PLAYER_STARTING_X = 0;
 static constexpr int PLAYER_STARTING_Y = 0;
 static constexpr int TREASURE_STARTING_X = -40;
 static constexpr int TREASURE_STARTING_Y = -40;
+static constexpr int POWERUP_STARTING_X = 40;
+static constexpr int POWERUP_STARTING_Y = -40;
 
 // Width and height of the the player and treasure bounding boxes
 static constexpr bn::size PLAYER_SIZE = {8, 8};
@@ -79,6 +84,7 @@ int main()
     bn::sprite_text_generator text_generator(common::fixed_8x16_sprite_font);
 
     int score = 0;
+    int lives = 3;
 
     // Setting a 60s game timer
     int time_left_seconds = 60; // starts at 60s
@@ -89,14 +95,10 @@ int main()
     // setting backdrop
     bn::regular_bg_ptr cave = bn::regular_bg_items::cave.create_bg(0, 0);
 
-    bn::sprite_ptr player = bn::sprite_items::openwingbird.create_sprite(-50, 50);
-    bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
+    bn::sprite_ptr player = bn::sprite_items::openwingbird.create_sprite(PLAYER_STARTING_X, PLAYER_STARTING_Y);
+    bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(TREASURE_STARTING_X, TREASURE_STARTING_Y);
+    bn::sprite_ptr powerup = bn::sprite_items::pill.create_sprite(POWERUP_STARTING_X, POWERUP_STARTING_Y);
     bn::string<16> costume = "open";
-
-    // spawn location, we will be spawning our char in the middle
-    // of the screen & spawning starting trasure at top left of char
-    player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
-    treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
 
     // background music
     bn::music_items::somewher.play();
@@ -177,6 +179,7 @@ int main()
         if (bn::keypad::a_released() || stamina <= 0)
         {
             // revert speed back
+            costume = "openwing";
             SPEED = 1;
             boostMode = false;
             if (stamina <= 0)
@@ -217,7 +220,7 @@ int main()
             int new_y = rng.get_int(MIN_Y, MAX_Y);
             treasure.set_position(new_x, new_y);
 
-            score++;
+            lives--;
         }
         // looping char around screen boundaries
         if (player.x() > MAX_X)
@@ -238,10 +241,10 @@ int main()
         }
 
         // Update score display
-        bn::string<MAX_SCORE_CHARS> score_string = bn::to_string<MAX_SCORE_CHARS>(score);
+        bn::string<MAX_SCORE_CHARS> lives_string = bn::to_string<MAX_SCORE_CHARS>(lives);
         score_sprites.clear();
         text_generator.generate(SCORE_X, SCORE_Y,
-                                score_string,
+                                lives_string,
                                 score_sprites);
 
         // update stamina display
@@ -264,7 +267,7 @@ int main()
             time_left_seconds--;
             frame_counter = 0;
 
-            if (time_left_seconds <= 0)
+            if (time_left_seconds <= 0 || lives <= 0)
             {
                 time_left_seconds = 0;
                 game_over = true; // This will trigger a freez block
@@ -272,7 +275,7 @@ int main()
         }
 
         // updating graphics for player
-        if (!boostMode && frame_counter >= 51)
+        if (!boostMode && frame_counter >= 59)
         {
             if (costume == "openwing")
             {
