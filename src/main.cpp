@@ -43,6 +43,7 @@ static constexpr int POWERUP_STARTING_Y = -40;
 // Width and height of the the player and treasure bounding boxes
 static constexpr bn::size PLAYER_SIZE = {8, 8};
 static constexpr bn::size TREASURE_SIZE = {8, 8};
+static constexpr bn::size POWERUP_SIZE = {8, 8};
 
 // Full bounds of the screen
 static constexpr int MIN_Y = -bn::display::height() / 2;
@@ -83,8 +84,8 @@ int main()
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> stamina_sprites = {};
     bn::sprite_text_generator text_generator(common::fixed_8x16_sprite_font);
 
-    int score = 0;
     int lives = 3;
+    bool roided = false;
 
     // Setting a 60s game timer
     int time_left_seconds = 60; // starts at 60s
@@ -111,7 +112,7 @@ int main()
             // if start is pressed the timer variables reset to restart the game
             if (bn::keypad::start_pressed())
             {
-                score = 0;
+                lives = 3;
                 SPEED = 1;
                 time_left_seconds = 60;
                 frame_counter = 0;
@@ -155,8 +156,10 @@ int main()
             treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
 
             // Reset score, speed, and boost mechanics
-            score = 0;
             SPEED = 1;
+            lives = 3;
+            roided = false;
+            powerup.set_visible(true);
 
             // Timer Reset
             time_left_seconds = 60;
@@ -212,6 +215,11 @@ int main()
                                           TREASURE_SIZE.width(),
                                           TREASURE_SIZE.height());
 
+        bn::rect powerup_rect = bn::rect(powerup.x().round_integer(),
+                                         powerup.y().round_integer(),
+                                         POWERUP_SIZE.width(),
+                                         POWERUP_SIZE.height());
+
         // If the bounding boxes overlap, set the treasure to a new location an increase score
         if (player_rect.intersects(treasure_rect))
         {
@@ -220,7 +228,20 @@ int main()
             int new_y = rng.get_int(MIN_Y, MAX_Y);
             treasure.set_position(new_x, new_y);
 
-            lives--;
+            if (roided)
+            {
+                continue;
+            }
+            else
+            {
+                lives--;
+            }
+        }
+
+        if (player_rect.intersects(powerup_rect))
+        {
+            powerup.set_visible(false);
+            roided = true;
         }
         // looping char around screen boundaries
         if (player.x() > MAX_X)
