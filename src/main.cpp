@@ -22,6 +22,10 @@
 #include "bn_sprite_items_closewingbird.h"
 #include "bn_sprite_items_openwingbird.h"
 
+// bg sprite
+#include "bn_regular_bg_ptr.h"
+#include "bn_regular_bg_items_cave.h"
+
 // Pixels / Frame player moves at
 // bn::fixed SPEED = 1.5;
 
@@ -83,7 +87,7 @@ int main()
 
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> timer_sprites = {};
     // setting backdrop
-    bn::backdrop::set_color(bn::color(0, 6, 20)); // Color Blue
+    bn::regular_bg_ptr cave = bn::regular_bg_items::cave.create_bg(0, 0);
 
     bn::sprite_ptr player = bn::sprite_items::openwingbird.create_sprite(-50, 50);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
