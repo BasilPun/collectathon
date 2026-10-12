@@ -17,6 +17,11 @@
 #include "common_fixed_8x16_font.h"
 #include "bn_music_items.h"
 
+// graphics for bird
+#include "bn_sprite_items_boostingbird.h"
+#include "bn_sprite_items_closewingbird.h"
+#include "bn_sprite_items_openwingbird.h"
+
 // Pixels / Frame player moves at
 // bn::fixed SPEED = 1.5;
 
@@ -80,8 +85,9 @@ int main()
     // setting backdrop
     bn::backdrop::set_color(bn::color(0, 6, 20)); // Color Blue
 
-    bn::sprite_ptr player = bn::sprite_items::square.create_sprite(-50, 50);
+    bn::sprite_ptr player = bn::sprite_items::openwingbird.create_sprite(-50, 50);
     bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(0, 0);
+    bn::string<16> costume = "open";
 
     // spawn location, we will be spawning our char in the middle
     // of the screen & spawning starting trasure at top left of char
@@ -254,6 +260,21 @@ int main()
             {
                 time_left_seconds = 0;
                 game_over = true; // This will trigger a freez block
+            }
+        }
+
+        // updating graphics for player
+        if (!boostMode && frame_counter >= 51)
+        {
+            if (costume == "openwing")
+            {
+                player.set_item(bn::sprite_items::closewingbird);
+                costume = "closewing";
+            }
+            else
+            {
+                player.set_item(bn::sprite_items::openwingbird);
+                costume = "openwing";
             }
         }
 
