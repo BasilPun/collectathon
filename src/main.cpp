@@ -165,6 +165,8 @@ int main()
             SPEED = 2.5;
             stamina = stamina - 1;
             boostMode = true;
+            player.set_item(bn::sprite_items::boostingbird);
+            costume = "boosting";
         }
         if (bn::keypad::a_released() || stamina <= 0)
         {
