@@ -17,7 +17,6 @@
 #include "common_fixed_8x16_font.h"
 #include "bn_music_items.h"
 
-
 // Pixels / Frame player moves at
 // bn::fixed SPEED = 1.5;
 
@@ -72,12 +71,12 @@ int main()
 
     int score = 0;
 
-    //Setting a 60s game timer
-    int time_left_seconds = 60; //starts at 60s
-    int frame_counter = 0;  //Tracks 60 fps
-    bool game_over = false; //stops the game when time runs out
+    // Setting a 60s game timer
+    int time_left_seconds = 60; // starts at 60s
+    int frame_counter = 0;      // Tracks 60 fps
+    bool game_over = false;     // stops the game when time runs out
 
-    bn::vector<bn::sprite_ptr,MAX_SCORE_CHARS> timer_sprites ={};
+    bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> timer_sprites = {};
     // setting backdrop
     bn::backdrop::set_color(bn::color(0, 6, 20)); // Color Blue
 
@@ -89,32 +88,33 @@ int main()
     player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
     treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
 
-    //background music 
+    // background music
     bn::music_items::somewher.play();
 
     while (true)
     {
-        //Timer control if GAME OVER, FREEZE GAMEPLAY
-        if(game_over)
-    {   
-        //if start is pressed the timer variables reset to restart the game
-        if(bn::keypad::start_pressed()){
-            score=0;
-            SPEED =1;
-            time_left_seconds = 60;
-            frame_counter =0;
-            game_over = false;
-            player.set_position(PLAYER_STARTING_X,PLAYER_STARTING_Y);
-            treasure.set_position(TREASURE_STARTING_X,TREASURE_STARTING_Y);
-        }
+        // Timer control if GAME OVER, FREEZE GAMEPLAY
+        if (game_over)
+        {
+            // if start is pressed the timer variables reset to restart the game
+            if (bn::keypad::start_pressed())
+            {
+                score = 0;
+                SPEED = 1;
+                time_left_seconds = 60;
+                frame_counter = 0;
+                game_over = false;
+                player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
+                treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
+            }
 
-        //Display message showing their final score
-        timer_sprites.clear();
-        text_generator.generate(0,0,"TIME'S UP!!", timer_sprites);
-        rng.update();
-        bn::core::update();
-        continue;// Skips the rest of the file so they cant score
-    }
+            // Display message showing their final score
+            timer_sprites.clear();
+            text_generator.generate(0, 0, "TIME'S UP!!", timer_sprites);
+            rng.update();
+            bn::core::update();
+            continue; // Skips the rest of the file so they cant score
+        }
         // Move player with d-pad
         if (bn::keypad::left_held())
         {
@@ -144,10 +144,10 @@ int main()
             score = 0;
             SPEED = 1;
 
-            //Timer Reset
-            time_left_seconds =60;
+            // Timer Reset
+            time_left_seconds = 60;
             frame_counter = 0;
-            game_over  = false;
+            game_over = false;
 
             // boosts = 0;
             // boostMode = false;
@@ -184,32 +184,6 @@ int main()
             }
             no_stamina = false;
         }
-        // if (boosts != 0 && boostMode == false)
-        // {
-        //     if (bn::keypad::a_pressed())
-        //     {
-        //         // if A pressed, increase speed & change bg color
-        //         SPEED = 2.5;
-        //         bn::backdrop::set_color(bn::color(15, 0, 0));//Color Red
-        //         boosts--;
-        //         boostMode = true;
-        //     }
-        // }
-
-        // // so that counter doesn't constantly count and waste compute
-        // if (boostMode)
-        // {
-        //     counter++;
-        //     // since 60fps, 180 frames = 3 second boost
-        //     if (counter >= 180)
-        //     {
-
-        //         bn::backdrop::set_color(bn::color(0, 6, 20));//Comes back to blue after boost
-        //         SPEED = 1.5;
-        //         counter = 0;
-        //         boostMode = false;
-        //     }
-        // }
 
         // The bounding boxes of the player and treasure, snapped to integer pixels
         bn::rect player_rect = bn::rect(player.x().round_integer(),
@@ -271,23 +245,23 @@ int main()
 
         // Clock ticking down
         frame_counter++;
-        if(frame_counter>=60)
+        if (frame_counter >= 60)
         {
             time_left_seconds--;
-            frame_counter =0;
+            frame_counter = 0;
 
-            if(time_left_seconds<=0)
+            if (time_left_seconds <= 0)
             {
-                time_left_seconds =0;
+                time_left_seconds = 0;
                 game_over = true; // This will trigger a freez block
             }
         }
 
-            bn::string<MAX_SCORE_CHARS>timer_string = "TIME:" + bn::to_string<MAX_SCORE_CHARS>(time_left_seconds);
-            timer_sprites.clear();
-            text_generator.generate(0, -70, timer_string, timer_sprites);
+        bn::string<MAX_SCORE_CHARS> timer_string = "TIME:" + bn::to_string<MAX_SCORE_CHARS>(time_left_seconds);
+        timer_sprites.clear();
+        text_generator.generate(0, -70, timer_string, timer_sprites);
         // Update RNG seed every frame so we don't get the same sequence of positions every time
-            rng.update();
+        rng.update();
 
         bn::core::update();
     }
