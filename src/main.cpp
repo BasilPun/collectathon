@@ -23,7 +23,6 @@
 #include "bn_sprite_items_closewingbird.h"
 #include "bn_sprite_items_openwingbird.h"
 
-
 // graphics for pill
 #include "bn_sprite_items_pill.h"
 // For Enemy Sprite
@@ -68,7 +67,7 @@ static constexpr int SCORE_Y = -70;
 static constexpr int STAMINA_X = -100;
 static constexpr int STAMINA_Y = -70;
 
-//HUD ONE ROW ACROSS THE TOP each Starting at its x(text is left aligned)
+//HUD ONE ROW ACROSS THE TOP each Starting at its X(text is left aligned)
 static constexpr int HUD_Y = -70;
 static constexpr int HUD_LIVES_X = -116;
 static constexpr int HUD_TIME_X = -48;
@@ -128,7 +127,6 @@ int main()
     bn::sprite_ptr powerup = bn::sprite_items::pill.create_sprite(POWERUP_STARTING_X, POWERUP_STARTING_Y);
     bn::sprite_ptr enemy = bn::sprite_items::enemy.create_sprite(ENEMY_STARTING_X, ENEMY_STARTING_Y);
     bn::string<16> costume = "open";
-
 
     // BACKGROUND MUSIC
     bn::music_items::somewher.play();
@@ -228,7 +226,6 @@ int main()
                 stamina = 0;
             }
         }
-
         if (!boostMode)
         {
             if (stamina < MAX_STAMINA)
