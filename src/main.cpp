@@ -26,7 +26,8 @@
 
 // graphics for pill
 #include "bn_sprite_items_pill.h"
-
+// For Enemy Sprite
+#include "bn_sprite_items_enemy.h"
 // bg sprite
 #include "bn_regular_bg_ptr.h"
 #include "bn_regular_bg_items_cave.h"
@@ -41,11 +42,14 @@ static constexpr int TREASURE_STARTING_X = -40;
 static constexpr int TREASURE_STARTING_Y = -40;
 static constexpr int POWERUP_STARTING_X = 40;
 static constexpr int POWERUP_STARTING_Y = -40;
+static constexpr int ENEMY_STARTING_X = 60;
+static constexpr int ENEMY_STARTING_Y = 40;
 
 // Width and height of the the player and treasure bounding boxes
 static constexpr bn::size PLAYER_SIZE = {8, 8};
 static constexpr bn::size TREASURE_SIZE = {8, 8};
 static constexpr bn::size POWERUP_SIZE = {8, 8};
+static constexpr bn::size ENEMY_SIZE = {16,16}; 
 
 // Full bounds of the screen
 static constexpr int MIN_Y = -bn::display::height() / 2;
@@ -64,8 +68,15 @@ static constexpr int SCORE_Y = -70;
 static constexpr int STAMINA_X = -100;
 static constexpr int STAMINA_Y = -70;
 
+//HUD ONE ROW ACROSS THE TOP each Starting at its x(text is left aligned)
+static constexpr int HUD_Y = -70;
+static constexpr int HUD_LIVES_X = -116;
+static constexpr int HUD_TIME_X = -48;
+static constexpr int HUD_BOOST_X= 20;
 static constexpr int NUM_TREASURES = 3;
 static constexpr int TREASURE_LIFETIME = 180; // 3 seconds
+
+static constexpr int HIT_COOLDOWN = 60;
 
 int main()
 {
@@ -88,9 +99,11 @@ int main()
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites = {};
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> stamina_sprites = {};
     bn::sprite_text_generator text_generator(common::fixed_8x16_sprite_font);
+    text_generator.set_left_alignment();//every text at the X we give it
 
     int lives = 3;
     bool roided = false;
+    int hit_cooldown = 0; // frames left before enemy can hurt you again
 
     // Setting a 60s game timer
     int time_left_seconds = 60; // starts at 60s
@@ -113,10 +126,11 @@ int main()
         treasure_timers.push_back(TREASURE_LIFETIME);
     }
     bn::sprite_ptr powerup = bn::sprite_items::pill.create_sprite(POWERUP_STARTING_X, POWERUP_STARTING_Y);
+    bn::sprite_ptr enemy = bn::sprite_items::enemy.create_sprite(ENEMY_STARTING_X, ENEMY_STARTING_Y);
     bn::string<16> costume = "open";
 
 
-    // background music
+    // BACKGROUND MUSIC
     bn::music_items::somewher.play();
 
     while (true)
@@ -128,10 +142,12 @@ int main()
             if (bn::keypad::start_pressed())
             {
                 lives = 3;
+                hit_cooldown = 0;
                 SPEED = 1;
                 time_left_seconds = 60;
                 frame_counter = 0;
                 game_over = false;
+                enemy.set_position(ENEMY_STARTING_X,ENEMY_STARTING_Y);
                 player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
                 for(int i= 0; i<NUM_TREASURES;i++)
                 {
@@ -139,10 +155,9 @@ int main()
                     treasure_timers[i]= TREASURE_LIFETIME;
                 }
             }
-
             // Display message showing their final score
             timer_sprites.clear();
-            text_generator.generate(0, 0, "TIME'S UP!!", timer_sprites);
+            text_generator.generate(-44, 0, "GAME OVER!!", timer_sprites);
             rng.update();
             bn::core::update();
             continue; // Skips the rest of the file so they cant score
@@ -270,6 +285,26 @@ int main()
             powerup.set_visible(false);
             roided = true;
         }
+        //Build a box around the enemy to check if player overlaps it
+        bn::rect enemy_rect = bn::rect(enemy.x().round_integer(),
+                                        enemy.y().round_integer(),
+                                        ENEMY_SIZE.width(),
+                                        ENEMY_SIZE.height());
+        //count down the invincibility timer after a hit
+        if(hit_cooldown > 0)
+        {
+            hit_cooldown--;
+        }
+        //Enemy touch costs a life, but only if we arent still invincible from recent hit
+        if(player_rect.intersects(enemy_rect)&& hit_cooldown == 0)
+        {
+            lives--;
+            hit_cooldown = HIT_COOLDOWN; // starts 1 sec invincibility
+            if(lives <=0)
+            {
+                game_over = true;
+            }
+        }
         // looping char around screen boundaries
         if (player.x() > MAX_X)
         {
@@ -288,10 +323,10 @@ int main()
             player.set_position(player.x(), MAX_Y); // loop from top edge to bottom edge
         }
 
-        // Update score display
-        bn::string<MAX_SCORE_CHARS> lives_string = bn::to_string<MAX_SCORE_CHARS>(lives);
+       // Update lives display
+        bn::string<MAX_SCORE_CHARS> lives_string = "LIVES:" + bn::to_string<MAX_SCORE_CHARS>(lives);
         score_sprites.clear();
-        text_generator.generate(SCORE_X, SCORE_Y,
+        text_generator.generate(HUD_LIVES_X, HUD_Y,
                                 lives_string,
                                 score_sprites);
 
@@ -304,7 +339,7 @@ int main()
         // call stamina boost cause stamina has too many chars
         bn::string stamina_text = "BOOST:" + stamina_string + "%";
 
-        text_generator.generate(STAMINA_X, STAMINA_Y,
+        text_generator.generate(HUD_BOOST_X, HUD_Y,
                                 stamina_text,
                                 stamina_sprites);
 
@@ -339,7 +374,7 @@ int main()
 
         bn::string<MAX_SCORE_CHARS> timer_string = "TIME:" + bn::to_string<MAX_SCORE_CHARS>(time_left_seconds);
         timer_sprites.clear();
-        text_generator.generate(0, -70, timer_string, timer_sprites);
+        text_generator.generate(HUD_TIME_X,HUD_Y, timer_string, timer_sprites);
         // Update RNG seed every frame so we don't get the same sequence of positions every time
         rng.update();
 
