@@ -8,6 +8,7 @@
 #include <bn_sprite_text_generator.h>
 #include <bn_size.h>
 #include <bn_string.h>
+#include <bn_vector.h>
 #include <bn_backdrop.h>
 #include <bn_color.h>
 #include <cmath>
@@ -21,6 +22,7 @@
 #include "bn_sprite_items_boostingbird.h"
 #include "bn_sprite_items_closewingbird.h"
 #include "bn_sprite_items_openwingbird.h"
+
 
 // graphics for pill
 #include "bn_sprite_items_pill.h"
@@ -62,6 +64,9 @@ static constexpr int SCORE_Y = -70;
 static constexpr int STAMINA_X = -100;
 static constexpr int STAMINA_Y = -70;
 
+static constexpr int NUM_TREASURES = 3;
+static constexpr int TREASURE_LIFETIME = 180; // 3 seconds
+
 int main()
 {
     bn::core::init();
@@ -96,10 +101,20 @@ int main()
     // setting backdrop
     bn::regular_bg_ptr cave = bn::regular_bg_items::cave.create_bg(0, 0);
 
+    //bird wings logic
     bn::sprite_ptr player = bn::sprite_items::openwingbird.create_sprite(PLAYER_STARTING_X, PLAYER_STARTING_Y);
-    bn::sprite_ptr treasure = bn::sprite_items::dot.create_sprite(TREASURE_STARTING_X, TREASURE_STARTING_Y);
+    bn::vector<bn::sprite_ptr,NUM_TREASURES> treasures;
+    bn::vector<int,NUM_TREASURES> treasure_timers;
+    //spwan each treasure at a random spot with a full 3 sec timer
+    for(int i=0; i < NUM_TREASURES; i++)
+    {
+        treasures.push_back(bn::sprite_items::dot.create_sprite(rng.get_int(MIN_X, MAX_X),
+                                                                rng.get_int(MIN_Y, MAX_Y)));
+        treasure_timers.push_back(TREASURE_LIFETIME);
+    }
     bn::sprite_ptr powerup = bn::sprite_items::pill.create_sprite(POWERUP_STARTING_X, POWERUP_STARTING_Y);
     bn::string<16> costume = "open";
+
 
     // background music
     bn::music_items::somewher.play();
@@ -118,7 +133,11 @@ int main()
                 frame_counter = 0;
                 game_over = false;
                 player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
-                treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
+                for(int i= 0; i<NUM_TREASURES;i++)
+                {
+                    treasures[i].set_position(rng.get_int(MIN_X, MAX_X), rng.get_int(MIN_Y, MAX_Y));
+                    treasure_timers[i]= TREASURE_LIFETIME;
+                }
             }
 
             // Display message showing their final score
@@ -151,10 +170,13 @@ int main()
         // Reset game state and player stats when the START button is pressed
         if (bn::keypad::start_pressed())
         {
-            // Reset positions of player and treasure to starting defaults
+            // Puts the player back at the start and respawn all treasures randomly
             player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
-            treasure.set_position(TREASURE_STARTING_X, TREASURE_STARTING_Y);
-
+            for (int i = 0; i < NUM_TREASURES; i++)
+            {
+                treasures[i].set_position(rng.get_int(MIN_X, MAX_X), rng.get_int(MIN_Y, MAX_Y));
+                treasure_timers[i] = TREASURE_LIFETIME;
+            }
             // Reset score, speed, and boost mechanics
             SPEED = 1;
             lives = 3;
@@ -205,34 +227,39 @@ int main()
             no_stamina = false;
         }
 
-        // The bounding boxes of the player and treasure, snapped to integer pixels
+        // The bounding boxes of the player and powerup, snapped to integer pixel
         bn::rect player_rect = bn::rect(player.x().round_integer(),
                                         player.y().round_integer(),
                                         PLAYER_SIZE.width(),
                                         PLAYER_SIZE.height());
-        bn::rect treasure_rect = bn::rect(treasure.x().round_integer(),
-                                          treasure.y().round_integer(),
-                                          TREASURE_SIZE.width(),
-                                          TREASURE_SIZE.height());
 
         bn::rect powerup_rect = bn::rect(powerup.x().round_integer(),
                                          powerup.y().round_integer(),
                                          POWERUP_SIZE.width(),
                                          POWERUP_SIZE.height());
 
-        // If the bounding boxes overlap, set the treasure to a new location an increase score
-        if (player_rect.intersects(treasure_rect))
+        // Go through every treasure: count down its 3 second timer, check if the
+        // player touched it, and move it to a new spot if it was touched or timed out
+        for (int i = 0; i < NUM_TREASURES; i++)
         {
-            // Jump to any random point in the screen
-            int new_x = rng.get_int(MIN_X, MAX_X);
-            int new_y = rng.get_int(MIN_Y, MAX_Y);
-            treasure.set_position(new_x, new_y);
+            treasure_timers[i]--; // treasure's own 3 second countdown
+            //Build a box around this treasure so we can check if the player overlaps
+            bn::rect treasure_rect = bn::rect(treasures[i].x().round_integer(),
+                                      treasures[i].y().round_integer(),
+                                      TREASURE_SIZE.width(),
+                                      TREASURE_SIZE.height());
+            bool touched = player_rect.intersects(treasure_rect);//player is on top of it
+            bool expired = treasure_timers[i] <= 0; // 3 seconds ran out
 
-            if (roided)
+            // move this treasure if the player hit it or its time ran out
+            if (touched || expired)
             {
-                continue;
+                treasures[i].set_position(rng.get_int(MIN_X, MAX_X), rng.get_int(MIN_Y, MAX_Y));
+                treasure_timers[i] = TREASURE_LIFETIME;
             }
-            else
+
+            //  Touching costs a life unless you have the powerup
+            if (touched && !roided)
             {
                 lives--;
             }
