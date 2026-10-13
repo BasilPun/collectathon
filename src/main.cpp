@@ -76,6 +76,9 @@ static constexpr int NUM_TREASURES = 3;
 static constexpr int TREASURE_LIFETIME = 180; // 3 seconds
 
 static constexpr int HIT_COOLDOWN = 60;
+//How many enemies are on screen and how often each one jumps to a new spot
+static constexpr int NUM_ENEMIES = 3; 
+static constexpr int ENEMY_LIFETIME = 300; //5 seconds x 60 frames
 
 int main()
 {
@@ -102,7 +105,7 @@ int main()
 
     int lives = 3;
     bool roided = false;
-    int hit_cooldown = 0; // frames left before enemy can hurt you again
+    int hit_cooldown = HIT_COOLDOWN; // frames left before enemy can hurt you again
 
     // Setting a 60s game timer
     int time_left_seconds = 60; // starts at 60s
@@ -125,7 +128,16 @@ int main()
         treasure_timers.push_back(TREASURE_LIFETIME);
     }
     bn::sprite_ptr powerup = bn::sprite_items::pill.create_sprite(POWERUP_STARTING_X, POWERUP_STARTING_Y);
-    bn::sprite_ptr enemy = bn::sprite_items::enemy.create_sprite(ENEMY_STARTING_X, ENEMY_STARTING_Y);
+    // One sprite and one timer per enemy; enemies[i] goes with enemy_timers[i]
+    bn::vector<bn::sprite_ptr, NUM_ENEMIES> enemies;
+    bn::vector<int, NUM_ENEMIES> enemy_timers;
+    // Spawn each enemy at a random spot
+    for (int i = 0; i < NUM_ENEMIES; i++)
+    {
+        enemies.push_back(bn::sprite_items::enemy.create_sprite(rng.get_int(MIN_X, MAX_X),
+                                                                rng.get_int(MIN_Y, MAX_Y)));
+        enemy_timers.push_back(ENEMY_LIFETIME);
+    }
     bn::string<16> costume = "open";
 
     // BACKGROUND MUSIC
@@ -140,12 +152,16 @@ int main()
             if (bn::keypad::start_pressed())
             {
                 lives = 3;
-                hit_cooldown = 0;
+                hit_cooldown = HIT_COOLDOWN;
                 SPEED = 1;
                 time_left_seconds = 60;
                 frame_counter = 0;
                 game_over = false;
-                enemy.set_position(ENEMY_STARTING_X,ENEMY_STARTING_Y);
+                for (int i = 0; i < NUM_ENEMIES; i++)
+                {
+                    enemies[i].set_position(rng.get_int(MIN_X, MAX_X), rng.get_int(MIN_Y, MAX_Y));
+                    enemy_timers[i] = ENEMY_LIFETIME;
+                }
                 player.set_position(PLAYER_STARTING_X, PLAYER_STARTING_Y);
                 for(int i= 0; i<NUM_TREASURES;i++)
                 {
@@ -282,24 +298,37 @@ int main()
             powerup.set_visible(false);
             roided = true;
         }
-        //Build a box around the enemy to check if player overlaps it
-        bn::rect enemy_rect = bn::rect(enemy.x().round_integer(),
-                                        enemy.y().round_integer(),
-                                        ENEMY_SIZE.width(),
-                                        ENEMY_SIZE.height());
-        //count down the invincibility timer after a hit
-        if(hit_cooldown > 0)
+                // count down the invincibility timer after a hit
+        if (hit_cooldown > 0)
         {
             hit_cooldown--;
         }
-        //Enemy touch costs a life, but only if we arent still invincible from recent hit
-        if(player_rect.intersects(enemy_rect)&& hit_cooldown == 0)
+        // Go through every enemy: count down it timer, move it if time ran out,
+        // and check if players hit
+        for (int i = 0; i < NUM_ENEMIES; i++)
         {
-            lives--;
-            hit_cooldown = HIT_COOLDOWN; // starts 1 sec invincibility
-            if(lives <=0)
+            enemy_timers[i]--;
+            if (enemy_timers[i] <= 0)
             {
-                game_over = true;
+                enemies[i].set_position(rng.get_int(MIN_X, MAX_X), rng.get_int(MIN_Y, MAX_Y));
+                enemy_timers[i] = ENEMY_LIFETIME;
+            }
+
+            // Build a box around this enemy so we can check if the player overlaps it
+            bn::rect enemy_rect = bn::rect(enemies[i].x().round_integer(),
+                                           enemies[i].y().round_integer(),
+                                           ENEMY_SIZE.width(),
+                                           ENEMY_SIZE.height());
+
+            // Enemy touch costs a life, but only if we aren't still invincible from a recent hit
+            if (player_rect.intersects(enemy_rect) && hit_cooldown == 0)
+            {
+                lives--;
+                hit_cooldown = HIT_COOLDOWN; // start the 1 second invincibility
+                if (lives <= 0)
+                {
+                    game_over = true;
+                }
             }
         }
         // looping char around screen boundaries
