@@ -334,7 +334,7 @@ int main()
                                            ENEMY_SIZE.height());
 
             // Enemy touch costs a life, but only if we aren't still invincible from a recent hit
-            if (player_rect.intersects(enemy_rect) && hit_cooldown == 0)
+            if (player_rect.intersects(enemy_rect) && hit_cooldown == 0 && !roided)
             {
                 lives--;  //enemy touch costs a life
                 hit_cooldown = HIT_COOLDOWN; // start the 1 second invincibility
