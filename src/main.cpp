@@ -71,14 +71,17 @@ static constexpr int STAMINA_Y = -70;
 static constexpr int HUD_Y = -70;
 static constexpr int HUD_LIVES_X = -116;
 static constexpr int HUD_TIME_X = -48;
-static constexpr int HUD_BOOST_X= 20;
+static constexpr int HUD_BOOST_X = 20;
+static constexpr int HUD_SCORE_X = -116;
+static constexpr int HUD_SCORE_Y = -54; // 16 pix below the first row
 static constexpr int NUM_TREASURES = 3;
 static constexpr int TREASURE_LIFETIME = 180; // 3 seconds
 
+//After an enemy hits you, you cant be hit again for 1 second
 static constexpr int HIT_COOLDOWN = 60;
 //How many enemies are on screen and how often each one jumps to a new spot
 static constexpr int NUM_ENEMIES = 3; 
-static constexpr int ENEMY_LIFETIME = 300; //5 seconds x 60 frames
+static constexpr int ENEMY_LIFETIME = 300; //5 seconds 
 
 int main()
 {
@@ -97,14 +100,16 @@ int main()
     float recovery_rate = 0.5;
     bool no_stamina = false;
 
-    // Will hold the sprites for the score
+    // Will hold the sprites for the lives, boost, and timer
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites = {};
     bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> stamina_sprites = {};
+    bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> points_sprites = {};
     bn::sprite_text_generator text_generator(common::fixed_8x16_sprite_font);
     text_generator.set_left_alignment();//every text at the X we give it
 
     int lives = 3;
     bool roided = false;
+    int score = 0;
     int hit_cooldown = HIT_COOLDOWN; // frames left before enemy can hurt you again
 
     // Setting a 60s game timer
@@ -152,6 +157,7 @@ int main()
             if (bn::keypad::start_pressed())
             {
                 lives = 3;
+                score = 0;
                 hit_cooldown = HIT_COOLDOWN;
                 SPEED = 1;
                 time_left_seconds = 60;
@@ -169,7 +175,7 @@ int main()
                     treasure_timers[i]= TREASURE_LIFETIME;
                 }
             }
-            // Display message showing their final score
+            // Show the game over message
             timer_sprites.clear();
             text_generator.generate(-44, 0, "GAME OVER!!", timer_sprites);
             rng.update();
@@ -206,11 +212,18 @@ int main()
                 treasures[i].set_position(rng.get_int(MIN_X, MAX_X), rng.get_int(MIN_Y, MAX_Y));
                 treasure_timers[i] = TREASURE_LIFETIME;
             }
-            // Reset score, speed, and boost mechanics
+            // Reset lives, speed, powerup and the enemy hit cooldown 
             SPEED = 1;
             lives = 3;
+            score = 0;
+            hit_cooldown = HIT_COOLDOWN;
             roided = false;
             powerup.set_visible(true);
+            for (int i = 0; i < NUM_ENEMIES; i++)
+            {
+                enemies[i].set_position(rng.get_int(MIN_X, MAX_X), rng.get_int(MIN_Y, MAX_Y));
+                enemy_timers[i] = ENEMY_LIFETIME;
+            }
 
             // Timer Reset
             time_left_seconds = 60;
@@ -287,9 +300,9 @@ int main()
             }
 
             //  Touching costs a life unless you have the powerup
-            if (touched && !roided)
+            if (touched)
             {
-                lives--;
+                score++;
             }
         }
 
@@ -323,7 +336,7 @@ int main()
             // Enemy touch costs a life, but only if we aren't still invincible from a recent hit
             if (player_rect.intersects(enemy_rect) && hit_cooldown == 0)
             {
-                lives--;
+                lives--;  //enemy touch costs a life
                 hit_cooldown = HIT_COOLDOWN; // start the 1 second invincibility
                 if (lives <= 0)
                 {
@@ -355,9 +368,13 @@ int main()
         text_generator.generate(HUD_LIVES_X, HUD_Y,
                                 lives_string,
                                 score_sprites);
-
+        //Update Score Display
+        bn::string<MAX_SCORE_CHARS> score_string = "SCORE:" + bn::to_string<MAX_SCORE_CHARS>(score);
+        points_sprites.clear();
+        text_generator.generate(HUD_SCORE_X, HUD_SCORE_Y,
+                                score_string,
+                                points_sprites);
         // update stamina display
-
         int int_stamina_percentage = stamina / MAX_STAMINA * 100;
         bn::string<MAX_SCORE_CHARS> stamina_string = bn::to_string<MAX_SCORE_CHARS>(int_stamina_percentage);
         stamina_sprites.clear();
